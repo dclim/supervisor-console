@@ -1,0 +1,17 @@
+{
+  "name": "supervisor-console",
+  "version": "0.0.1",
+  "description": "Simple UI exercising supervisor status endpoint",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/dclim/supervisor-console.git"
+  },
+  "bin": {
+    "supervisor-console": "bin/supervisor-console"
+  },
+  "dependencies": {
+    "express": "4.13.3",
+    "http-proxy-middleware": "0.14.0"
+  }  
+}
