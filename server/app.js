@@ -12,7 +12,8 @@ if (!proxyTarget) {
 var options = {
   target: proxyTarget,
   changeOrigin: true,
-  pathRewrite: { '^/supervisor' : '/druid/indexer/v1/supervisor' }
+  pathRewrite: { '^/supervisor' : '/druid/indexer/v1/supervisor' },
+  autoRewrite: true
 };
 var apiProxy = proxy('/supervisor', options);
 var publicPath = path.join(path.dirname(fs.realpathSync(__filename)), '../public');

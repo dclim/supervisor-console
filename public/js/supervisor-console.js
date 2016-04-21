@@ -1,7 +1,7 @@
 $(document).ready(function() {
   window.supervisorConsole = {}
   supervisorConsole.pollingRate = 3000
-  supervisorConsole.lastOffsetSum = {}
+  supervisorConsole.pastOffsets = {}
 
   setInterval(refresh, supervisorConsole.pollingRate)
   refresh()
@@ -35,9 +35,18 @@ function refresh() {
             summedOffsets += task.currentOffsets[key]
           }
 
-          // this is pretty simplistic, we'd probably want to use a rolling window to calculate the rate
-          var ingestionRate = (summedOffsets - supervisorConsole.lastOffsetSum[task.id]) / (supervisorConsole.pollingRate / 1000)
-          supervisorConsole.lastOffsetSum[task.id] = summedOffsets
+          if (!supervisorConsole.pastOffsets[task.id]) {
+            supervisorConsole.pastOffsets[task.id] = [];
+          }
+          var myPastOffsets = supervisorConsole.pastOffsets[task.id];
+          if (myPastOffsets.length >= 10) {
+            myPastOffsets.shift();
+          }
+
+          var current = {"time": new Date().getTime(), "offsets": summedOffsets};
+          myPastOffsets.push(current);
+
+          var ingestionRate = (current.offsets - myPastOffsets[0].offsets) / ((current.time - myPastOffsets[0].time) / 1000);
 
           currentTaskData += '<div><div class="badge right-floating-badge">' + (isNaN(ingestionRate) ? '0.00' : ingestionRate.toFixed(2)) + ' events/sec</div><p>' + task.id + '</p></div>'
           currentTaskData += '<div class="progress"><div class="progress-bar" role="progressbar" aria-valuenow="' + percentComplete + '" aria-valuemin="0" aria-valuemax="100" style="min-width:9em; width: ' + percentComplete + '%;">Remaining: ' + (task.remainingSeconds === null ? '?' : task.remainingSeconds) + ' s</div></div>'
