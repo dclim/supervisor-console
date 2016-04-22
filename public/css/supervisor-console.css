@@ -23,3 +23,8 @@ table {
 .right-floating-badge {
   float: right;
 }
+
+.update-time-div {
+  float: right;
+  font-size: 0.9em;
+}

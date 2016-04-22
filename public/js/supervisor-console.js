@@ -14,20 +14,22 @@ function refresh() {
 
     for (var iSupervisor = 0; iSupervisor < supervisors.length; iSupervisor++) {
       $.get('supervisor/' + supervisors[iSupervisor] + '/status', function(data) {
-        var taskHeader = '<h2>' + data.dataSource + '</h2>'
+        var payload = data.payload
+        var taskHeader = '<h2>' + payload.dataSource + '</h2>'
         taskHeader += '<div>'
-        taskHeader +=   '<span class="task-badge-span">Topic <span class="badge">' + data.topic + '</span></span>'
-        taskHeader +=   '<span class="task-badge-span">Partitions <span class="badge">' + data.partitions + '</span></span>'
-        taskHeader +=   '<span class="task-badge-span">Replicas <span class="badge">' + data.replicas + '</span></span>'
+        taskHeader +=   '<span class="task-badge-span">Topic <span class="badge">' + payload.topic + '</span></span>'
+        taskHeader +=   '<span class="task-badge-span">Partitions <span class="badge">' + payload.partitions + '</span></span>'
+        taskHeader +=   '<span class="task-badge-span">Replicas <span class="badge">' + payload.replicas + '</span></span>'
+        taskHeader +=   '<div class="update-time-div">Updated: ' + new Date(data.generationTime) + '</div>'
         taskHeader += '</div>'
 
         var currentTaskData = '<h4>Current Tasks</h4>'
-        currentTaskData += data.activeTasks.length === 0 ? '[No active tasks]' : ''
-        for (var i = 0; i < data.activeTasks.length; i++) {
+        currentTaskData += payload.activeTasks.length === 0 ? '[No active tasks]' : ''
+        for (var i = 0; i < payload.activeTasks.length; i++) {
           var summedOffsets = 0
           var offsetHeader = "", startingOffsets = "", currentOffsets = ""
-          var task = data.activeTasks[i];
-          var percentComplete = task.remainingSeconds === null ? 0 : (data.durationSeconds - task.remainingSeconds) / data.durationSeconds * 100.0
+          var task = payload.activeTasks[i];
+          var percentComplete = task.remainingSeconds === null ? 0 : (payload.durationSeconds - task.remainingSeconds) / payload.durationSeconds * 100.0
           for (var key in task.startingOffsets) {
             offsetHeader += '<th>' + key + '</th>'
             startingOffsets += '<td>' + task.startingOffsets[key] + '</td>'
@@ -58,11 +60,11 @@ function refresh() {
         }
 
         var publishingTaskData = '<h4>Publishing Tasks</h4>'
-        publishingTaskData += data.publishingTasks.length === 0 ? '[No publishing tasks]' : ''
+        publishingTaskData += payload.publishingTasks.length === 0 ? '[No publishing tasks]' : ''
 
-        for (var i = 0; i < data.publishingTasks.length; i++) {
+        for (var i = 0; i < payload.publishingTasks.length; i++) {
           var offsetHeader = "", startingOffsets = "", currentOffsets = ""
-          var task = data.publishingTasks[i];
+          var task = payload.publishingTasks[i];
           var summedDeltaOffsets = 0
           for (var key in task.startingOffsets) {
             offsetHeader += '<th>' + key + '</th>'
@@ -79,7 +81,7 @@ function refresh() {
           publishingTaskData += '</table>'
         }
         
-        responses[data.dataSource] = taskHeader + currentTaskData + publishingTaskData
+        responses[payload.dataSource] = taskHeader + currentTaskData + publishingTaskData
 
         if (--remaining === 0) {
           var output = ""
