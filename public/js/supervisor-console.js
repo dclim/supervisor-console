@@ -20,9 +20,8 @@ function refresh() {
         taskHeader +=   '<span class="task-badge-span">Topic <span class="badge">' + payload.topic + '</span></span>'
         taskHeader +=   '<span class="task-badge-span">Partitions <span class="badge">' + payload.partitions + '</span></span>'
         taskHeader +=   '<span class="task-badge-span">Replicas <span class="badge">' + payload.replicas + '</span></span>'
-        taskHeader +=   '<div class="update-time-div">Updated: ' + new Date(data.generationTime) + '</div>'
-        taskHeader += '</div>'
 
+        var totalIngestionRate = 0
         var currentTaskData = '<h4>Current Tasks</h4>'
         currentTaskData += payload.activeTasks.length === 0 ? '[No active tasks]' : ''
         for (var i = 0; i < payload.activeTasks.length; i++) {
@@ -49,8 +48,9 @@ function refresh() {
           myPastOffsets.push(current);
 
           var ingestionRate = (current.offsets - myPastOffsets[0].offsets) / ((current.time - myPastOffsets[0].time) / 1000);
+          totalIngestionRate += ingestionRate
 
-          currentTaskData += '<div><div class="badge right-floating-badge">' + (isNaN(ingestionRate) ? '0.00' : ingestionRate.toFixed(2)) + ' events/sec</div><p>' + task.id + '</p></div>'
+          currentTaskData += '<div><div class="badge right-floating-badge">' + (isNaN(ingestionRate) ? '0.0' : ingestionRate.toFixed(1)) + ' events/sec</div><p>' + task.id + '</p></div>'
           currentTaskData += '<div class="progress"><div class="progress-bar" role="progressbar" aria-valuenow="' + percentComplete + '" aria-valuemin="0" aria-valuemax="100" style="min-width:9em; width: ' + percentComplete + '%;">Remaining: ' + (task.remainingSeconds === null ? '?' : task.remainingSeconds) + ' s</div></div>'
           currentTaskData += '<table class="table table-bordered table-striped table-condensed">'
           currentTaskData +=   '<tr><th>Partition</th>' + offsetHeader + '</tr>'
@@ -80,6 +80,10 @@ function refresh() {
           publishingTaskData +=   '<tr><th>Current Offset</th>' + currentOffsets + '</tr>'  
           publishingTaskData += '</table>'
         }
+
+        taskHeader +=   '<span class="task-badge-span">Rate <span class="badge">' + (isNaN(totalIngestionRate) ? '0.0' : totalIngestionRate.toFixed(1)) + ' events/sec</span></span>'
+        taskHeader +=   '<div class="update-time-div">Updated: ' + new Date(data.generationTime) + '</div>'
+        taskHeader += '</div>'
         
         responses[payload.dataSource] = taskHeader + currentTaskData + publishingTaskData
 
